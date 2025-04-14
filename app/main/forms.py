@@ -20,3 +20,9 @@ class TicketReplyForm(FlaskForm):
     message = StringField('Reply', validators=[DataRequired()])
     attachment = FileField('Attach File', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'pdf', 'zip'])])
     submit = SubmitField('Post Reply')
+    
+class PrivateMessageForm(FlaskForm):
+    recipient = SelectField('To', coerce=int)
+    message = TextAreaField('Message', validators=[DataRequired()])
+    attachment = FileField('Attach File', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'pdf', 'zip'])])
+    submit = SubmitField('Send')
