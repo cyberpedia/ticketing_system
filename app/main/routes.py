@@ -86,3 +86,33 @@ def ticket_detail(ticket_id):
         return redirect(url_for('main.ticket_detail', ticket_id=ticket_id))
 
     return render_template('main/ticket_detail.html', ticket=ticket, form=form)
+
+@main.route('/messages', methods=['GET', 'POST'])
+@login_required
+def private_messages():
+    form = PrivateMessageForm()
+    form.recipient.choices = [(u.id, u.username) for u in User.query.filter(User.id != current_user.id).all()]
+
+    if form.validate_on_submit():
+        filename = None
+        if form.attachment.data:
+            filename = secure_filename(form.attachment.data.filename)
+            form.attachment.data.save(os.path.join(UPLOAD_FOLDER, filename))
+
+        message = PrivateMessage(
+            sender_id=current_user.id,
+            recipient_id=form.recipient.data,
+            message=form.message.data,
+            attachment=filename
+        )
+        db.session.add(message)
+        db.session.commit()
+        flash('Message sent!')
+        return redirect(url_for('main.private_messages'))
+
+    # Group by conversations
+    sent = PrivateMessage.query.filter_by(sender_id=current_user.id)
+    received = PrivateMessage.query.filter_by(recipient_id=current_user.id)
+    messages = sent.union(received).order_by(PrivateMessage.timestamp.desc()).all()
+
+    return render_template('main/private_messages.html', form=form, messages=messages)
