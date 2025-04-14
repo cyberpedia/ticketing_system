@@ -2,6 +2,7 @@ from . import db
 from flask_login import UserMixin
 from . import login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -16,6 +17,16 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+class Ticket(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='open')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref='tickets')
+    attachment = db.Column(db.String(255))  # filename of uploaded file
+    
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
