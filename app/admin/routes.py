@@ -26,3 +26,13 @@ def edit_ticket(ticket_id):
         return redirect(url_for('admin.manage_tickets'))
 
     return render_template('admin/ticket_edit.html', form=form, ticket=ticket)
+
+@admin.route('/logs')
+@login_required
+def view_logs():
+    if current_user.role != 'admin':
+        abort(403)
+    log_file = os.path.join(current_app.root_path, '../logs/app.log')
+    with open(log_file, 'r') as f:
+        lines = f.readlines()[-100:]  # last 100 lines
+    return render_template('admin/view_logs.html', log_lines=lines)
