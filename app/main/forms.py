@@ -15,3 +15,8 @@ class TicketForm(FlaskForm):
     description = StringField('Description', validators=[DataRequired()])
     attachment = FileField('Attach File', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'pdf', 'zip'], 'Invalid file type')])
     submit = SubmitField('Submit Ticket')
+
+class TicketReplyForm(FlaskForm):
+    message = StringField('Reply', validators=[DataRequired()])
+    attachment = FileField('Attach File', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'pdf', 'zip'])])
+    submit = SubmitField('Post Reply')
