@@ -26,6 +26,9 @@ class Ticket(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref='tickets')
     attachment = db.Column(db.String(255))  # filename of uploaded file
+    priority = db.Column(db.String(20), default='Normal')  # Low, Normal, High
+    assigned_to_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    assigned_to = db.relationship('User', foreign_keys=[assigned_to_id])
     
 @login_manager.user_loader
 def load_user(user_id):
