@@ -59,3 +59,30 @@ def ticket_list():
     else:
         tickets = Ticket.query.filter_by(user=current_user).order_by(Ticket.created_at.desc()).all()
     return render_template('main/ticket_list.html', tickets=tickets)
+
+@main.route('/tickets/<int:ticket_id>', methods=['GET', 'POST'])
+@login_required
+def ticket_detail(ticket_id):
+    ticket = Ticket.query.get_or_404(ticket_id)
+    if ticket.user != current_user and current_user.role != 'admin':
+        abort(403)
+
+    form = TicketReplyForm()
+    if form.validate_on_submit():
+        filename = None
+        if form.attachment.data:
+            filename = secure_filename(form.attachment.data.filename)
+            form.attachment.data.save(os.path.join(UPLOAD_FOLDER, filename))
+
+        reply = TicketReply(
+            message=form.message.data,
+            ticket=ticket,
+            user=current_user,
+            attachment=filename
+        )
+        db.session.add(reply)
+        db.session.commit()
+        flash('Reply posted.')
+        return redirect(url_for('main.ticket_detail', ticket_id=ticket_id))
+
+    return render_template('main/ticket_detail.html', ticket=ticket, form=form)
