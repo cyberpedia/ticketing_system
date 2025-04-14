@@ -30,3 +30,14 @@ class Ticket(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+class TicketReply(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    attachment = db.Column(db.String(255))
+
+    user = db.relationship('User', backref='ticket_replies')
+    ticket = db.relationship('Ticket', backref='replies')
