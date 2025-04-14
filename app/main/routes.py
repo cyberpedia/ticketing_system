@@ -3,7 +3,8 @@ from werkzeug.utils import secure_filename
 from ..config import UPLOAD_FOLDER
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from .. import db
+from flask_socketio import emit
+from .. import db, socketio
 from ..models import User
 from .forms import ProfileForm
 
@@ -116,3 +117,17 @@ def private_messages():
     messages = sent.union(received).order_by(PrivateMessage.timestamp.desc()).all()
 
     return render_template('main/private_messages.html', form=form, messages=messages)
+
+# After message is saved
+socketio.emit('private_message', {
+    'recipient_id': form.recipient.data,
+    'sender': current_user.username,
+    'preview': form.message.data[:40]
+}, broadcast=True)
+
+socketio.emit('ticket_event', {
+    'type': 'reply',
+    'ticket_id': ticket.id,
+    'from': current_user.username,
+    'message': reply.message[:50]
+}, broadcast=True)
