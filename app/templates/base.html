@@ -7,6 +7,15 @@
 </head>
 <body>
     <a href="{{ url_for('main.profile') }}"><i class="fa fa-user"></i> {{ current_user.username }}</a>
+    <a href="{{ url_for('main.private_messages') }}">
+    <i class="fa fa-envelope"></i> Messages
+    <span id="msgBadge" class="badge bg-danger d-none">1</span>
+</a>
+<a href="{{ url_for('main.notifications') }}">
+    <i class="fa fa-bell"></i> Notifications
+    <span id="ticketBadge" class="badge bg-warning text-dark d-none">1</span>
+</a>
+
 
     <div class="container mt-4">
         {% with messages = get_flashed_messages() %}
@@ -18,11 +27,21 @@
     </div>
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
 <script>
     const socket = io();
 
     socket.on('private_message', function(data) {
+        if (data.recipient_id == {{ current_user.id if current_user.is_authenticated else 0 }}) {
+            document.getElementById('msgBadge').classList.remove('d-none');
+        }
+    });
+
+    socket.on('ticket_event', function(data) {
+        document.getElementById('ticketBadge').classList.remove('d-none');
+    });
+
+    /*socket.on('private_message', function(data) {
         if (data.recipient_id == {{ current_user.id if current_user.is_authenticated else 0 }}) {
             alert('New message from ' + data.sender + ': ' + data.preview);
             // Optional: flash icon or redirect
@@ -31,7 +50,7 @@
 
     socket.on('ticket_event', function(data) {
         alert('Ticket updated by ' + data.from + ': ' + data.message);
-    });
+    });*/
 </script>
 
 </body>
